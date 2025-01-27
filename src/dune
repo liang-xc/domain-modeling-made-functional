@@ -1,0 +1,5 @@
+(library
+ (name order_taking)
+ (libraries core async yojson re uri)
+ (preprocess
+  (pps ppx_let)))
