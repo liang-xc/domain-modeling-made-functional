@@ -1,7 +1,7 @@
 open! Core
 
 (** Useful functions for constrained types *)
-module ConstrainedType = struct
+module Constrained_type = struct
   (** create a constrained string
       return Error if input is empty or length > [max_len] *)
   let create_string field_name max_len str =
@@ -82,69 +82,72 @@ module String50 = struct
   type t = string
 
   let value str = str
-  let create field_name str = ConstrainedType.create_string field_name 50 str
-  let create_opt field_name str = ConstrainedType.create_string_opt field_name 50 str
+  let create field_name str = Constrained_type.create_string field_name 50 str
+  let create_opt field_name str = Constrained_type.create_string_opt field_name 50 str
 end
 
-module EmailAddress = struct
+module Email_address = struct
   type t = string
 
   let value str = str
 
   let create field_name str =
     let pattern = {|.+@.+|} in
-    ConstrainedType.create_like field_name pattern str
+    Constrained_type.create_like field_name pattern str
   ;;
 end
 
-module ZipCode = struct
+module Zipcode = struct
   type t = string
 
   let value str = str
 
   let create field_name str =
     let pattern = {|\d{5}|} in
-    ConstrainedType.create_like field_name pattern str
+    Constrained_type.create_like field_name pattern str
   ;;
 end
 
-module OrderLineId = struct
-  type t = string
-end
-
-module OrderId = struct
+module Order_line_id = struct
   type t = string
 
   let value str = str
-  let create field_name str = ConstrainedType.create_string field_name 50 str
+  let create filed_name str = Constrained_type.create_string filed_name 50 str
 end
 
-module WidgetCode = struct
+module Order_id = struct
+  type t = string
+
+  let value str = str
+  let create field_name str = Constrained_type.create_string field_name 50 str
+end
+
+module Widget_code = struct
   type t = string
 
   let value code = code
 
   let create field_name code =
     let pattern = {|W\d{4}|} in
-    ConstrainedType.create_like field_name pattern code
+    Constrained_type.create_like field_name pattern code
   ;;
 end
 
-module GizmoCode = struct
+module Gizmo_code = struct
   type t = string
 
   let value code = code
 
   let create field_name code =
     let pattern = {|G\d{3}|} in
-    ConstrainedType.create_like field_name pattern code
+    Constrained_type.create_like field_name pattern code
   ;;
 end
 
-module ProductCode = struct
+module Product_code = struct
   type t =
-    | Widget of WidgetCode.t
-    | Gizmo of GizmoCode.t
+    | Widget of Widget_code.t
+    | Gizmo of Gizmo_code.t
 
   let value product_code =
     match product_code with
@@ -160,11 +163,11 @@ module ProductCode = struct
       Error msg)
     else if String.is_prefix code ~prefix:"W"
     then (
-      let%map wc = WidgetCode.create field_name code in
+      let%map wc = Widget_code.create field_name code in
       Widget wc)
     else if String.is_prefix code ~prefix:"G"
     then (
-      let%map gc = GizmoCode.create field_name code in
+      let%map gc = Gizmo_code.create field_name code in
       Gizmo gc)
     else (
       let msg = field_name ^ ": Format does not recognized '" ^ code ^ "'" in
@@ -172,39 +175,39 @@ module ProductCode = struct
   ;;
 end
 
-module UnitQuantity = struct
+module Unit_quantity = struct
   type t = int
 
   let value v = v
-  let create field_name v = ConstrainedType.create_int field_name 1 1000 v
+  let create field_name v = Constrained_type.create_int field_name 1 1000 v
 end
 
-module KilogramQuantity = struct
+module Kilogram_quantity = struct
   type t = float
 
   let value v = v
-  let create field_name v = ConstrainedType.create_decimal field_name 0.05 100. v
+  let create field_name v = Constrained_type.create_decimal field_name 0.05 100. v
 end
 
-module OrderQuantity = struct
+module Order_quantity = struct
   type t =
-    | Unit of UnitQuantity.t
-    | Kilogram of KilogramQuantity.t
+    | Unit of Unit_quantity.t
+    | Kilogram of Kilogram_quantity.t
 
   let value qty =
     match qty with
-    | Unit uq -> uq |> UnitQuantity.value |> Float.of_int
-    | Kilogram kq -> kq |> KilogramQuantity.value
+    | Unit uq -> uq |> Unit_quantity.value |> Float.of_int
+    | Kilogram kq -> kq |> Kilogram_quantity.value
   ;;
 
   let create field_name product_code quantity =
     let open Result.Let_syntax in
     match product_code with
-    | ProductCode.Widget _ ->
-      let%map u = UnitQuantity.create field_name (Int.of_float quantity) in
+    | Product_code.Widget _ ->
+      let%map u = Unit_quantity.create field_name (Int.of_float quantity) in
       Unit u
-    | ProductCode.Gizmo _ ->
-      let%map k = KilogramQuantity.create field_name quantity in
+    | Product_code.Gizmo _ ->
+      let%map k = Kilogram_quantity.create field_name quantity in
       Kilogram k
   ;;
 end
@@ -213,7 +216,7 @@ module Price = struct
   type t = float
 
   let value v = v
-  let create v = ConstrainedType.create_decimal "Price" 0. 100. v
+  let create v = Constrained_type.create_decimal "Price" 0. 100. v
 
   let unsafe_create v =
     match create v with
@@ -224,11 +227,11 @@ module Price = struct
   let multiply qty p = create (qty *. p)
 end
 
-module BillingAmount = struct
+module Billing_amount = struct
   type t = float
 
   let value v = v
-  let create v = ConstrainedType.create_decimal "BillingAmount" 0. 10000. v
+  let create v = Constrained_type.create_decimal "BillingAmount" 0. 10000. v
 
   let sum_prices prices =
     prices |> List.map ~f:Price.value |> List.fold ~init:0. ~f:Float.( + ) |> create
@@ -247,7 +250,7 @@ type person_name =
 
 type customer_info =
   { name : person_name
-  ; email_address : EmailAddress.t
+  ; email_address : Email_address.t
   }
 
 type address =
@@ -256,5 +259,5 @@ type address =
   ; address_line3 : String50.t option
   ; address_line4 : String50.t option
   ; city : String50.t
-  ; zipcode : ZipCode.t
+  ; zipcode : Zipcode.t
   }

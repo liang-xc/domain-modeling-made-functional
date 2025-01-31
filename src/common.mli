@@ -18,7 +18,7 @@ module String50 : sig
   val create_opt : string -> string -> (t option, string) result
 end
 
-module EmailAddress : sig
+module Email_address : sig
   type t
 
   (** return the string value inside t *)
@@ -29,7 +29,7 @@ module EmailAddress : sig
   val create : string -> string -> (t, string) result
 end
 
-module ZipCode : sig
+module Zipcode : sig
   type t
 
   (** return the string value inside t *)
@@ -40,11 +40,18 @@ module ZipCode : sig
   val create : string -> string -> (t, string) result
 end
 
-module OrderLineId : sig
-  type t = string
+module Order_line_id : sig
+  type t
+
+  (** return the string value inside t *)
+  val value : t -> string
+
+  (** create t from string
+      return Error if input is empty or length > 50 *)
+  val create : string -> string -> (t, string) result
 end
 
-module OrderId : sig
+module Order_id : sig
   (** Constrained to be a non-empty string < 10 chars *)
   type t
 
@@ -56,7 +63,7 @@ module OrderId : sig
   val create : string -> string -> (t, string) result
 end
 
-module WidgetCode : sig
+module Widget_code : sig
   (** the code for widgets, starts with a "W" and then four digits *)
   type t
 
@@ -68,7 +75,7 @@ module WidgetCode : sig
   val create : string -> string -> (t, string) result
 end
 
-module GizmoCode : sig
+module Gizmo_code : sig
   (** the code for gizmos, starts with a "G" and then three digits *)
   type t
 
@@ -80,11 +87,11 @@ module GizmoCode : sig
   val create : string -> string -> (t, string) result
 end
 
-module ProductCode : sig
+module Product_code : sig
   (** a product code is either a widget or a gizmo *)
   type t =
-    | Widget of WidgetCode.t
-    | Gizmo of GizmoCode.t
+    | Widget of Widget_code.t
+    | Gizmo of Gizmo_code.t
 
   (** return the string value inside t *)
   val value : t -> string
@@ -94,7 +101,7 @@ module ProductCode : sig
   val create : string -> string -> (t, string) result
 end
 
-module UnitQuantity : sig
+module Unit_quantity : sig
   (** constrained to be an integer between 1 and 1000 *)
   type t
 
@@ -106,7 +113,7 @@ module UnitQuantity : sig
   val create : string -> int -> (t, string) result
 end
 
-module KilogramQuantity : sig
+module Kilogram_quantity : sig
   (** constrained to be a float between 0.05 and 100.00 *)
   type t
 
@@ -118,16 +125,14 @@ module KilogramQuantity : sig
   val create : string -> float -> (t, string) result
 end
 
-module OrderQuantity : sig
-  type t =
-    | Unit of UnitQuantity.t
-    | Kilogram of KilogramQuantity.t
+module Order_quantity : sig
+  type t
 
   (** return the value inside t *)
   val value : t -> float
 
   (** create t from a product code and a quantity *)
-  val create : string -> ProductCode.t -> float -> (t, string) result
+  val create : string -> Product_code.t -> float -> (t, string) result
 end
 
 module Price : sig
@@ -150,7 +155,7 @@ module Price : sig
   val multiply : float -> t -> (t, string) result
 end
 
-module BillingAmount : sig
+module Billing_amount : sig
   (** constrained to be a float between 0.0 and 10000.0 *)
   type t
 
@@ -178,7 +183,7 @@ type person_name =
 
 type customer_info =
   { name : person_name
-  ; email_address : EmailAddress.t
+  ; email_address : Email_address.t
   }
 
 type address =
@@ -187,5 +192,5 @@ type address =
   ; address_line3 : String50.t option
   ; address_line4 : String50.t option
   ; city : String50.t
-  ; zipcode : ZipCode.t
+  ; zipcode : Zipcode.t
   }
